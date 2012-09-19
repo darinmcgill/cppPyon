@@ -11,7 +11,7 @@ using namespace tr1;
 
 namespace cppPyon {
     class Value;
-    typedef shared_ptr< map<Value,Value> > MapPtr;
+    typedef shared_ptr< map<string,Value> > MapPtr;
     typedef shared_ptr< string > StrPtr;
     typedef shared_ptr< vector<Value> > VecPtr;
     enum ValueType {Null,Bool,Int,Double,String,List,Mapping,Pyob};
@@ -47,7 +47,7 @@ namespace cppPyon {
                 if (vt == List) {
                     v_.reset( new vector<Value> );
                 } else if (vt == Mapping || vt == Pyob) {
-                    m_.reset( new map<Value,Value> );
+                    m_.reset( new map<string,Value> );
                 } else {
                     throw "bad constructor";
                 }
@@ -76,7 +76,7 @@ namespace cppPyon {
                     oss << "]";
                 }
                 if (vType_ == Mapping) {
-                    map<Value,Value>::iterator m;
+                    map<string,Value>::iterator m;
                     oss << "{";
                     for (m=m_->begin();m!=m_->end();m++)
                         oss << (*m).first << ":" << (*m).second << ",";
@@ -116,30 +116,22 @@ namespace cppPyon {
                 if (vType_ == Double) return d_ < other.d_;
                 throw "comparison on compound types!";
             };
-            Value& operator[](const Value v) {
-                if (vType_ == Mapping || vType_ == Pyob) return (*m_)[v];
+            Value& operator[](const string s) {
+                if (vType_ == Mapping || vType_ == Pyob) return (*m_)[s];
                 throw "type not compatiable";
             };
             Value& operator[](const char * c) {
                 if (vType_ == Mapping || vType_ == Pyob) 
-                    return (*m_)[Value(c)];
+                    return (*m_)[string(c)];
                 throw "type not compatiable";
             };
             Value& operator[](int n) {
-                if (vType_ == Mapping || vType_ == Pyob) 
-                    return (*m_)[Value(n)];
-                if (vType_ == List)
-                    return (*v_)[n];
+                if (vType_ == List || vType_ == Pyob) return (*v_)[n];
                 throw "type not compatiable";
             };
             void putName(const char * c){ putName(string(c)); };
-            void putName(string s) { (*m_)[Value()] = s; };
+            void putName(string s) { s_.reset( new string(s) ); };
             ValueType getType() const { return vType_; };
-            Value& operator[](const string& str) {
-                if (vType_ == Mapping || vType_ == Pyob) 
-                    return (*m_)[Value(str)];
-                throw "type not compatiable";
-            };
     };
     inline 
     ostream& operator<<(ostream& output,const Value& value) {

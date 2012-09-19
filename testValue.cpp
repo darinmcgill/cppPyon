@@ -26,9 +26,8 @@ int main(int argc,char* argv[]) {
     cout << "not =>" << (Value(17) == 19) << endl;
     cout << "want=>" << (Value(17.0) == 17) << endl;
     Value m = Value(Mapping);
-    m[Value()] = Value(List);
     m["foo"] = "bar";
-    m[3] = 19;
+    m["3"] = 19;
     m["other"] = l;
     cout << m << endl;
     l.push_back(99);
