@@ -9,4 +9,8 @@ int main(int argc,char* argv[]) {
         Token t(& current);
         cout << t.getRepr() << endl;
     }
+    cout << Token(Comma).getRepr() << endl;
+    cout << Token(OpenParen).getRepr() << endl;
+    cout << Token(Bareword,Value("foo")).getRepr() << endl;
+    cout << Token(Str,Value("foo")).getRepr() << endl;
 }

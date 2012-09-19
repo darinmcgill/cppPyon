@@ -19,7 +19,7 @@ namespace cppPyon {
     };
     
     class Token {
-        public:
+        private:
             TokenType type_;
             Value value_;
             void readString(char ** readFrom) {
@@ -97,6 +97,12 @@ namespace cppPyon {
                 while (wordChar(**readFrom)) (*readFrom)++;
                 value_ = Value(start,(*readFrom) - start);
                 type_ = Bareword;
+            };
+        public:
+            Token(TokenType t) { type_ = t; };
+            Token(TokenType t,Value v) {
+                type_ = t;
+                value_ = v;
             };
             Token(char **readFrom) {
                 while (isWhiteSpace(**readFrom)) (*readFrom)++;
