@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 #include <string>
 #include <iostream>
@@ -28,6 +29,7 @@ namespace cppPyon {
             Value(bool b) { i_ = b; vType_ = Bool; };
             Value(int64_t i) {i_ = i; vType_ = Int;};
             Value(int i) {i_ = i; vType_ = Int;};
+            Value(uint64_t i) {i_ = (int) i; vType_ = Int;};
             Value(double d){d_ = d; vType_ = Double;};
             Value(const string& s){ 
                 s_.reset( new string(s) );
@@ -35,6 +37,10 @@ namespace cppPyon {
             }; 
             Value(const char * p) { 
                 s_.reset( new string(p) );
+                vType_ = String; 
+            };
+            Value(const char * p,size_t len) { 
+                s_.reset( new string(p,len) );
                 vType_ = String; 
             };
             Value(ValueType vt) {
