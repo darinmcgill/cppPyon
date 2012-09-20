@@ -5,8 +5,9 @@ using namespace cppPyon;
 using namespace std;
 
 int main(int argc,char* argv[]) {
-    cout << "ValueType:" << sizeof(ValueType) << endl;
-    cout << "Value:" << sizeof(Value) << endl;
+    cout << "sizeof ValueType:" << sizeof(ValueType) << endl;
+    cout << "sizeof Value:" << sizeof(Value) << endl;
+    cout << "sizeof string:" << sizeof(string) << endl;
 
     cout << "True:" << Value(true) << endl;
     cout << "True:" << Value(false) << endl;
@@ -32,4 +33,24 @@ int main(int argc,char* argv[]) {
     cout << m << endl;
     l.push_back(99);
     cout << m << endl;
+    
+    Value p(Pyob);
+    p.putName("A");
+    cout << p << endl;
+
+    Value p2(Pyob);
+    p2.putName("A");
+    p2.push_back(Value(7));
+    cout << p2 << endl;
+
+    Value p3(Pyob);
+    p3.putName("A");
+    p3["b"] = l;
+    cout << p3 << endl;
+
+    Value p4(Pyob);
+    p4.putName("A");
+    p4["b"] = "abc";
+    p4.push_back(17);
+    cout << p4 << endl;
 }

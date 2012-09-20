@@ -12,13 +12,15 @@ namespace cppPyon {
         CloseBracket = ']',
         OpenCurly = '{',
         CloseCurly = '}',
-        Str = 1,
+        Eq = '=', 
+        Colon = ':',
+        Quoted = 1,
         Bareword = 2,
-        Number = 3,
-        Assoc = '=', // = or :
+        Number = 3
     };
     
     class Token {
+        friend ostream& operator<<(ostream& output,const Token& token);
         private:
             TokenType type_;
             Value value_;
@@ -30,7 +32,7 @@ namespace cppPyon {
                     (*readFrom)++;
                 value_ = Value(start,(*readFrom) - start);
                 (*readFrom)++;
-                type_ = Str;
+                type_ = Quoted;
             };
             bool isWhiteSpace(char w) {
                 return w == ' ' || w == '\t' || w == '\n';
@@ -116,12 +118,9 @@ namespace cppPyon {
                     case ']':
                     case '{':
                     case '}':
-                        type_ = (TokenType) first; 
-                        (*readFrom) += 1;
-                        return;
                     case '=':
                     case ':':
-                        type_ = Assoc;
+                        type_ = (TokenType) first; 
                         (*readFrom) += 1;
                         return;
                     case '\'': 
@@ -148,11 +147,21 @@ namespace cppPyon {
                             string(1,(char)type_) + "')";
                 if (type_ == Bareword)
                     return "Bareword(" + value_.getRepr() + ")";
-                if (type_ == Str)
-                    return "Str(" + value_.getRepr() + ")";
+                if (type_ == Quoted)
+                    return "Quoted(" + value_.getRepr() + ")";
                 if (type_ == Number)
                     return "Number(" + value_.getRepr() + ")";
                 if (type_ == End) return "End()";
             };
+            TokenType getType() { return type_; };
+            Value getValue() { return value_; };
+            bool operator==(char c) const {
+                return c == (char) type_;
+            };
     };
+    inline 
+    ostream& operator<<(ostream& output,const Token& token) {
+        output << token.getRepr();
+        return output;
+    }
 }

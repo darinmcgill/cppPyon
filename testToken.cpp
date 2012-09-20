@@ -12,5 +12,5 @@ int main(int argc,char* argv[]) {
     cout << Token(Comma).getRepr() << endl;
     cout << Token(OpenParen).getRepr() << endl;
     cout << Token(Bareword,Value("foo")).getRepr() << endl;
-    cout << Token(Str,Value("foo")).getRepr() << endl;
+    cout << Token(Quoted,Value("foo")).getRepr() << endl;
 }
