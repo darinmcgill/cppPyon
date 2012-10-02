@@ -54,7 +54,16 @@ namespace cppPyon {
                 if (vType_ == Bool && i_) return 1.0;
                 if (vType_ == Bool && ! i_) return 0.0;
                 if (vType_ == String) return atof(s_->c_str());
-                throw "type not compatible"; };
+                throw "type not compatible"; 
+            };
+
+            int64_t getInt() {
+                if (vType_ == Int) return i_;
+                if (vType_ == Bool &&   i_) return 1;
+                if (vType_ == Bool && ! i_) return 0;
+                if (vType_ == Double) return (int64_t) d_;
+                throw "type not compatible"; 
+            };
 
             bool getBool() {
                 if (vType_ == Bool || vType_ == Int) return i_ != 0;
