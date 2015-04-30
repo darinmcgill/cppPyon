@@ -8,7 +8,8 @@ namespace cppPyon {
         private:
             deque<Token> tokens_;
             Token pop() {
-                if (tokens_.empty()) throw "ran out of tokens?";
+                if (tokens_.empty()) 
+                    throw runtime_error("ran out of tokens?");
                 Token out = tokens_[0];
                 tokens_.pop_front();
                 return out;
@@ -19,7 +20,7 @@ namespace cppPyon {
                 out.promote();
                 while (1) {
                     if (tokens_.empty()) 
-                        throw "ran out of tokens parsing Pyob";
+                        throw runtime_error("ran out of tokens parsing Pyob");
                     if (tokens_[0] == ')') {
                         tokens_.pop_front();
                         return out; }
@@ -27,7 +28,7 @@ namespace cppPyon {
                         tokens_.pop_front();
                         continue; }
                     if (tokens_[0] == '}' || tokens_[0] == ']')
-                        throw "mismatched (";
+                        throw runtime_error("mismatched (");
                     if (tokens_[0].getType() == Bareword) {
                         if (tokens_.size() > 3 && tokens_[1] == '=') {
                             string key(tokens_[0].getValue().c_str());
@@ -42,7 +43,7 @@ namespace cppPyon {
                 Value out(List);
                 while (1) {
                     if (tokens_.empty()) 
-                        throw "ran out of tokens parsing List";
+                        throw runtime_error("ran out of tokens parsing List");
                     if (tokens_[0] == ']') {
                         tokens_.pop_front();
                         return out; }
@@ -50,7 +51,7 @@ namespace cppPyon {
                         tokens_.pop_front();
                         continue; }
                     if (tokens_[0] == ')' || tokens_[0] == '}')
-                        throw "mismatched [";
+                        throw runtime_error("mismatched [");
                     out.push_back( readValue() );
                 }
             };
@@ -58,7 +59,7 @@ namespace cppPyon {
                 Value out(Mapping);
                 while (1) {
                     if (tokens_.empty()) 
-                        throw "ran out of tokens parsing Mapping";
+                        throw runtime_error("ran out of tokens for Mapping");
                     if (tokens_[0] == '}') {
                         tokens_.pop_front();
                         return out; }
@@ -75,7 +76,7 @@ namespace cppPyon {
                 }
             };
             Value readValue() {
-                if (tokens_.empty()) throw "out of tokens?";
+                if (tokens_.empty()) throw runtime_error("out of tokens?");
                 Token t = tokens_.at(0);
                 tokens_.pop_front();
                 if (t.getType() == Number) return t.getValue();
@@ -94,7 +95,7 @@ namespace cppPyon {
                 if (t == '[') return readList();
                 if (t == '{') return readMapping();
                 cerr << "don't know what to do with" << t.getRepr() << endl;
-                throw "incomplete FDKJDF"; }
+                throw runtime_error("incomplete FDKJDF"); }
         public:
             Value parse(const char * input) {
                 char* current = (char *) input;

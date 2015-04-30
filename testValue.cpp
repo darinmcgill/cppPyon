@@ -10,7 +10,7 @@ int main(int argc,char* argv[]) {
     cout << "sizeof string:" << sizeof(string) << endl;
 
     cout << "True:" << Value(true) << endl;
-    cout << "True:" << Value(false) << endl;
+    cout << "False:" << Value(false) << endl;
     cout << "None:" << Value() << endl;
     cout << "string:" << Value("string") << endl;
     cout << "------------" << endl;

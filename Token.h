@@ -139,7 +139,7 @@ namespace cppPyon {
                 if (first >= '0' && first <= '9') readNumber(readFrom);
                 else if (first >= 'a' && first <= 'z') readBareword(readFrom);
                 else if (first >= 'A' && first <= 'Z') readBareword(readFrom);
-                else throw "don't know how to read";
+                else throw runtime_error("don't know how to read");
             };
             string getRepr() const {
                 if (type_ > 10) 
@@ -152,6 +152,7 @@ namespace cppPyon {
                 if (type_ == Number)
                     return "Number(" + value_.getRepr() + ")";
                 if (type_ == End) return "End()";
+                throw runtime_error("unexpected");
             };
             TokenType getType() { return type_; };
             Value getValue() { return value_; };
