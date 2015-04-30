@@ -117,7 +117,21 @@ namespace cppPyon {
             // mutators //
             //////////////
             void putName(const char * c){ putName(string(c)); };
-            void putName(string s) { s_.reset( new string(s) ); };
+            void putName(string s) { 
+                s_.reset( new string(s) ); 
+                if (vType_ == Pyob) return;
+                if (vType_ == List) {
+                    m_.reset( new map<Value,Value> );
+                    vType_ = Pyob;
+                    return;
+                }
+                if (vType_ == Mapping)  {
+                    v_.reset( new vector<Value> );
+                    vType_ = Pyob;
+                    return;
+                }
+                throw new runtime_error("can't putName");
+            };
             void push_back(Value value) { v_->push_back(value); };
             void promote() {
                 if (vType_ != String) 
@@ -126,6 +140,11 @@ namespace cppPyon {
                 m_.reset( new map<Value,Value> );
                 vType_ = Pyob;
             };
+            void operator/=(Value value) {
+                if (not ((vType_ == List) or (vType_ == Pyob)) ) 
+                    throw runtime_error("operation not supported");
+                v_->push_back(value);
+            }
 
 
             ///////////////////

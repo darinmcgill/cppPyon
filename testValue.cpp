@@ -53,4 +53,15 @@ int main(int argc,char* argv[]) {
     p4["b"] = "abc";
     p4.push_back(17);
     cout << p4 << endl;
+
+    Value p5 = "foo";
+    cout << p5.getType() << endl;
+
+    Value p6 = List;
+    p6 /= p5;
+    p6 /= List;
+    p6 /= Null;
+    cout << p6 << endl;
+    p6.putName("bar");
+    cout << p6 << endl;
 }
