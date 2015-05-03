@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <utility>
 using namespace std;
 
 namespace cppPyon {
@@ -17,73 +18,75 @@ namespace cppPyon {
     typedef shared_ptr< vector<Value> > VecPtr;
     enum ValueType {Null,Bool,Int,Double,String,List,Mapping,Pyob};
     class Value {
+        friend Value operator<<(Value left, Value right);
         friend ostream& operator<<(ostream& output,const Value& value);
+        friend Value operator<<(ValueType t,const Value& value);
         private:
             MapPtr m_;
             StrPtr s_;
             VecPtr v_;
             double d_;
             int i_;
-            ValueType vType_;
+            ValueType t_;
         public:
 
             ///////////////
             // accessors //
             ///////////////
 
-            ValueType getType() const { return vType_; };
+            ValueType getType() const { return t_; };
 
             MapPtr getMap() { 
-                if (vType_ == Mapping || vType_ == Pyob) return m_;
+                if (t_ == Mapping || t_ == Pyob) return m_;
                 throw runtime_error("type not compatible");};
 
             VecPtr getVec() { 
-                if (vType_ == List || vType_ == Pyob) return v_;
+                if (t_ == List || t_ == Pyob) return v_;
                 throw runtime_error("type not compatible");};
 
             StrPtr getStr() {
-                if (vType_ == String || vType_ == Pyob) return s_;
+                if (t_ == String || t_ == Pyob) return s_;
                 throw runtime_error("type not compatible");
             }
 
             double getDouble() {
-                if (vType_ == Double) return d_;
-                if (vType_ == Int) return (double) i_;
-                if (vType_ == Null) return 0.0/0.0;
-                if (vType_ == Bool && i_) return 1.0;
-                if (vType_ == Bool && ! i_) return 0.0;
-                if (vType_ == String) return atof(s_->c_str());
+                if (t_ == Double) return d_;
+                if (t_ == Int) return (double) i_;
+                if (t_ == Null) return 0.0/0.0;
+                if (t_ == Bool && i_) return 1.0;
+                if (t_ == Bool && ! i_) return 0.0;
+                if (t_ == String) return atof(s_->c_str());
                 throw runtime_error("type not compatible"); 
             };
 
-            int64_t getInt() {
-                if (vType_ == Int) return i_;
-                if (vType_ == Bool &&   i_) return 1;
-                if (vType_ == Bool && ! i_) return 0;
-                if (vType_ == Double) return (int64_t) d_;
+            int getInt() {
+                if (t_ == Int) return i_;
+                if (t_ == Bool &&   i_) return 1;
+                if (t_ == Bool && ! i_) return 0;
+                if (t_ == Double) return (int) d_;
                 throw runtime_error("type not compatible"); 
             };
 
             bool getBool() {
-                if (vType_ == Bool || vType_ == Int) return i_ != 0;
-                if (vType_ == Double) return d_ != 0;
-                if (vType_ == Null) return false;
-                if (vType_ == Pyob) return true;
-                if (vType_ == Mapping) return getSize() > 0;
-                if (vType_ == List) return getSize() > 0;
-                if (vType_ == String) return getSize() > 0; 
+                if (t_ == Bool || t_ == Int) return i_ != 0;
+                if (t_ == Double) return d_ != 0;
+                if (t_ == Null) return false;
+                if (t_ == Pyob) return true;
+                if (t_ == Mapping) return getSize() > 0;
+                if (t_ == List) return getSize() > 0;
+                if (t_ == String) return getSize() > 0; 
                 throw runtime_error("bad type?");
             };
 
             int getSize() {
-                if (vType_ == List) return v_->size();
-                if (vType_ == Mapping) return m_->size();
-                if (vType_ == Pyob) return v_->size();
-                if (vType_ == String) return s_->size();
+                if (t_ == List) return v_->size();
+                if (t_ == Mapping) return m_->size();
+                if (t_ == Pyob) return v_->size();
+                if (t_ == String) return s_->size();
                 throw runtime_error("type not compatible"); };
 
             const char* c_str() {
-                if (vType_ == String) return s_->c_str();
+                if (t_ == String) return s_->c_str();
                 throw runtime_error("type not compatible");
             };
             
@@ -91,27 +94,29 @@ namespace cppPyon {
             //////////////////
             // CONSTRUCTORS //
             //////////////////
-            Value() { vType_ = Null; };
-            Value(bool b) { i_ = b; vType_ = Bool; };
-            Value(int64_t i) {i_ = i; vType_ = Int;};
-            Value(int i) {i_ = i; vType_ = Int;};
-            Value(uint64_t i) {i_ = (int) i; vType_ = Int;};
-            Value(double d){d_ = d; vType_ = Double;};
+            Value() { t_ = Null; };
+            Value(bool b) { i_ = b; t_ = Bool; };
+            Value(int i) {i_ = i; t_ = Int;};
+            Value(double d){d_ = d; t_ = Double;};
             Value(const string& s){ 
                 s_.reset( new string(s) );
-                vType_ = String; }; 
+                t_ = String; }; 
             Value(const char * p) { 
                 s_.reset( new string(p) );
-                vType_ = String; };
+                t_ = String; };
             Value(const char * p,size_t len) { 
                 s_.reset( new string(p,len) );
-                vType_ = String; };
+                t_ = String; };
             Value(ValueType vt) {
                 if (vt == List || vt == Pyob) 
                     v_.reset( new vector<Value> );
                 if (vt == Mapping || vt == Pyob) 
                     m_.reset( new map<Value,Value> );
-                vType_ = vt; };
+                t_ = vt; };
+            Value(pair<Value,Value> p) {
+                m_.reset( new map<Value,Value> );
+                (*m_)[p.first] = p.second;
+            }
 
             //////////////
             // mutators //
@@ -119,29 +124,29 @@ namespace cppPyon {
             void putName(const char * c){ putName(string(c)); };
             void putName(string s) { 
                 s_.reset( new string(s) ); 
-                if (vType_ == Pyob) return;
-                if (vType_ == List) {
+                if (t_ == Pyob) return;
+                if (t_ == List) {
                     m_.reset( new map<Value,Value> );
-                    vType_ = Pyob;
+                    t_ = Pyob;
                     return;
                 }
-                if (vType_ == Mapping)  {
+                if (t_ == Mapping)  {
                     v_.reset( new vector<Value> );
-                    vType_ = Pyob;
+                    t_ = Pyob;
                     return;
                 }
                 throw new runtime_error("can't putName");
             };
             void push_back(Value value) { v_->push_back(value); };
             void promote() {
-                if (vType_ != String) 
+                if (t_ != String) 
                     throw runtime_error("can only promote strings");
                 v_.reset( new vector<Value> );
                 m_.reset( new map<Value,Value> );
-                vType_ = Pyob;
+                t_ = Pyob;
             };
-            void operator/=(Value value) {
-                if (not ((vType_ == List) or (vType_ == Pyob)) ) 
+            void operator<<=(Value value) {
+                if (not ((t_ == List) or (t_ == Pyob)) ) 
                     throw runtime_error("operation not supported");
                 v_->push_back(value);
             }
@@ -152,20 +157,20 @@ namespace cppPyon {
             ///////////////////
             string getRepr() const {
                 bool first = true;
-                if (vType_ == String) {
+                if (t_ == String) {
                     string out("\"");
                     out += *s_;
                     out += "\"";
                     return out;
                 }
-                if (vType_ == Null) return string("null");
-                if (vType_ == Bool) {
+                if (t_ == Null) return string("null");
+                if (t_ == Bool) {
                     if (i_) return string("true");
                     else return string("false"); }
                 stringstream oss;
-                if (vType_ == Int) oss << i_;
-                if (vType_ == Double) oss << d_;
-                if (vType_ == List) {
+                if (t_ == Int) oss << i_;
+                if (t_ == Double) oss << d_;
+                if (t_ == List) {
                     oss << "[";
                     for (auto it=v_->begin();it !=v_->end();it++) {
                         if (not first) oss << ",";
@@ -174,7 +179,7 @@ namespace cppPyon {
                     }
                     oss << "]";
                 }
-                if (vType_ == Mapping) {
+                if (t_ == Mapping) {
                     oss << "{";
                     for (auto m=m_->begin();m!=m_->end();m++) {
                         if (not first) oss << ",";
@@ -183,7 +188,7 @@ namespace cppPyon {
                     }
                     oss << "}";
                 }
-                if (vType_ == Pyob) {
+                if (t_ == Pyob) {
                     oss << *s_;
                     oss << "(";
                     for (int i=0;has_key(i);i++) {
@@ -193,7 +198,7 @@ namespace cppPyon {
                     }
                     for (auto m2 = m_->begin();m2 != m_->end(); m2++) {
                         if (not first) oss << ",";
-                        if (m2->first.vType_ != String)
+                        if (m2->first.t_ != String)
                             throw runtime_error("bad Pyob key");
                         oss << *(m2->first.s_) << "=" << m2->second;
                         first = false;
@@ -207,42 +212,42 @@ namespace cppPyon {
             // == and < operators //
             ////////////////////////
             bool operator==(const char * c) const {
-                if (vType_ == String) return (*s_) == c;
+                if (t_ == String) return (*s_) == c;
                 return false;
             }
             bool operator==(const Value & other) const {
-                if (vType_ != other.vType_) return false;
-                if (vType_ == String) 
+                if (t_ != other.t_) return false;
+                if (t_ == String) 
                     return *s_ == *other.s_;
-                if (vType_ == Null) return true;
-                if (vType_ == Bool | vType_ == Int)
+                if (t_ == Null) return true;
+                if (t_ == Bool | t_ == Int)
                     return i_ == other.i_;
-                if ( vType_ == Double)
+                if ( t_ == Double)
                     return d_ == other.d_;
                 throw runtime_error("eq test on compound types");
             };
             bool operator==(bool other) const {
-                if (vType_ != Bool) return false;
+                if (t_ != Bool) return false;
                 return other == (bool) i_;
             };
             bool operator==(int other) const {
-                if (vType_ == Int) return other == (int) i_;
-                if (vType_ == Double && d_ - (int) d_ == 0)
+                if (t_ == Int) return other == (int) i_;
+                if (t_ == Double && d_ - (int) d_ == 0)
                     return other == (int) d_;
                 return false;
             };
             bool operator==(double other) const {
-                if (vType_ == Double) return other == d_;
-                if (vType_ == Int && other - (int) other == 0) 
+                if (t_ == Double) return other == d_;
+                if (t_ == Int && other - (int) other == 0) 
                     return i_ == (int) other;
                 return false;
             };
             bool operator<(const Value & other) const {
-                if (vType_ != other.vType_) return vType_ < other.vType_;
-                if (vType_ == String) return *s_ < *other.s_;
-                if (vType_ == Int || vType_ == Bool) return i_ < other.i_;
-                if (vType_ == Null) return false;
-                if (vType_ == Double) return d_ < other.d_;
+                if (t_ != other.t_) return t_ < other.t_;
+                if (t_ == String) return *s_ < *other.s_;
+                if (t_ == Int || t_ == Bool) return i_ < other.i_;
+                if (t_ == Null) return false;
+                if (t_ == Double) return d_ < other.d_;
                 throw runtime_error("comparison on compound types!");
             };
 
@@ -250,36 +255,36 @@ namespace cppPyon {
             // element access //
             ////////////////////
             Value& operator[](const string s) {
-                if (vType_ == Mapping || vType_ == Pyob) return (*m_)[s];
+                if (t_ == Mapping || t_ == Pyob) return (*m_)[s];
                 throw runtime_error("type not compatiable");
             };
             Value& operator[](const char * c) {
-                if (vType_ == Mapping || vType_ == Pyob) 
+                if (t_ == Mapping || t_ == Pyob) 
                     return (*m_)[Value(c)];
                 throw runtime_error("type not compatiable");
             };
             Value& operator[](int n) {
-                if (vType_ == List || vType_ == Pyob) return (*v_)[n];
+                if (t_ == List || t_ == Pyob) return (*v_)[n];
                 throw runtime_error("type not compatiable");
             };
             Value& operator[](Value v) {
-                if (v.vType_ == Int && (vType_ == List || vType_ == Pyob))
+                if (v.t_ == Int && (t_ == List || t_ == Pyob))
                         return (*v_)[v.i_];
-                if (vType_ == Mapping || vType_ == Pyob) return (*m_)[v];
+                if (t_ == Mapping || t_ == Pyob) return (*m_)[v];
                 throw runtime_error("type not compatiable");
             };
             bool has_key(const char * c) const {
-                if (! (vType_ == Mapping || vType_ == Pyob)) return false;
+                if (! (t_ == Mapping || t_ == Pyob)) return false;
                 return m_->count(string(c)) > 0; };
             bool has_key(int i) const {
-                if (vType_ == List || vType_ == Pyob) return i < v_->size(); 
-                if (vType_ == Mapping) return m_->count(Value(i)) > 0;
+                if (t_ == List || t_ == Pyob) return i < v_->size(); 
+                if (t_ == Mapping) return m_->count(Value(i)) > 0;
                 return false;
             };
             bool has_key(Value v) const {
-                if (v.vType_ == Int && (vType_ == List || vType_ == Pyob))
+                if (v.t_ == Int && (t_ == List || t_ == Pyob))
                         return v.i_ < v_->size(); 
-                if (v.vType_ == Mapping || v.vType_ == Pyob)
+                if (v.t_ == Mapping || v.t_ == Pyob)
                     return m_->count(v) > 0;
                 return false;
             };
@@ -288,5 +293,29 @@ namespace cppPyon {
     ostream& operator<<(ostream& output,const Value& value) {
         output << value.getRepr();
         return output;
+    }
+    inline 
+    Value operator<<(ValueType t,const Value& value) {
+        if (t != List) throw runtime_error("bad left for <<");
+        Value out(List);
+        out.v_->push_back(value);
+        return out;
+    }
+    inline
+    Value operator<<(Value left, Value right) {
+        while (1) {
+            if (left.t_ == List) break; 
+            if (left.t_ == Pyob) break;
+            throw runtime_error("bad <<");
+        }
+        left.v_->push_back(right);
+        return left;
+    }
+    inline 
+    Value operator/(ValueType left, string right) {
+        if (left != Pyob) throw runtime_error("bad /");
+        Value value = Pyob;
+        value.putName(right);
+        return value;
     }
 }

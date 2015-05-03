@@ -57,11 +57,20 @@ int main(int argc,char* argv[]) {
     Value p5 = "foo";
     cout << p5.getType() << endl;
 
-    Value p6 = List;
-    p6 /= p5;
-    p6 /= List;
-    p6 /= Null;
+    Value p6 = List << "hello" << "world" << 32;
+    p6 << Null << false;
     cout << p6 << endl;
-    p6.putName("bar");
-    cout << p6 << endl;
+    //p6.putName("bar");
+    //cout << p6 << endl;
+
+    //Value p7 = List << "bar" << 7;
+    //p7 << "foo";
+    //cout << p7 << endl;
+
+    Value p7 = Pyob / "foobar";
+    p7 <<= "cheese";
+    cout << p7 << endl;
+
+    Value p8 = Mapping;
+    cout << p8 << endl;
 }
