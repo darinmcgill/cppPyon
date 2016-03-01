@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <algorithm>
 using namespace std;
 
 namespace cppPyon {
@@ -21,6 +22,7 @@ namespace cppPyon {
         friend Value operator<<(Value left, Value right);
         friend ostream& operator<<(ostream& output,const Value& value);
         friend Value operator<<(ValueType t,const Value& value);
+        friend Value unionOf(Value left, Value rite);
         private:
             MapPtr m_;
             StrPtr s_;
@@ -176,6 +178,12 @@ namespace cppPyon {
                 v_->push_back(value);
             }
 
+            void sort() {
+                if (not (t_ == List))
+                    throw runtime_error("can only sort lists");
+                if (v_->size() < 2) return;
+                std::sort(v_->begin(),v_->end());
+            }
 
             ///////////////////
             // serialization //
@@ -402,6 +410,34 @@ namespace cppPyon {
     {
         Value out = Mapping;
         out.put(args...);
+        return out;
+    }
+
+    Value unionOf(Value left, Value rite) {
+        if (left.t_ != List) return unionOf(listOf(left),rite);
+        if (rite.t_ != List) return unionOf(left,listOf(rite));
+        left.sort();
+        rite.sort();
+        Value out = List;
+        auto leftIt = left.v_->begin();
+        auto riteIt = rite.v_->begin();
+        while (not (leftIt == left.v_->end() or riteIt == rite.v_->end())) {
+            if (*leftIt == *riteIt) {
+                out.push_back(*leftIt);
+                leftIt++;
+                riteIt++;
+                continue;
+            }
+            if (*leftIt < *riteIt) {
+                out.push_back(*leftIt);
+                leftIt++;
+                continue;
+            }
+            out.push_back(*riteIt);
+            riteIt++;
+        }
+        while (leftIt != left.v_->end()) out.push_back(*(leftIt++));
+        while (riteIt != rite.v_->end()) out.push_back(*(riteIt++));
         return out;
     }
 }

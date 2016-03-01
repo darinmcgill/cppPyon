@@ -103,4 +103,15 @@ int main(int argc,char* argv[]) {
 
     Value q3 = mapOf("cheese",23,"fries",73);
     cout << q3 << endl;
+
+    Value q4 = listOf(7,3,4,"cheese",true,"fries");
+    q4.sort();
+    cout << q4 << endl;
+
+    Value q51 = listOf(7,1,4,9);
+    Value q52 = listOf(7,13,1);
+    Value q53 = unionOf(q51,q52);
+    cout << q53 << endl;
+    Value q54 = unionOf(q53,8);
+    cout << q54 << endl;
 }
