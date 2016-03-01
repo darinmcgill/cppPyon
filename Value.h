@@ -37,15 +37,15 @@ namespace cppPyon {
             ValueType getType() const { return t_; };
 
             MapPtr getMap() { 
-                if (t_ == Mapping || t_ == Pyob) return m_;
+                if (t_ == Mapping or t_ == Pyob) return m_;
                 throw runtime_error("type not compatible");};
 
             VecPtr getVec() { 
-                if (t_ == List || t_ == Pyob) return v_;
+                if (t_ == List or t_ == Pyob) return v_;
                 throw runtime_error("type not compatible");};
 
             StrPtr getStr() {
-                if (t_ == String || t_ == Pyob) return s_;
+                if (t_ == String or t_ == Pyob) return s_;
                 throw runtime_error("type not compatible");
             }
 
@@ -108,15 +108,16 @@ namespace cppPyon {
                 s_.reset( new string(p,len) );
                 t_ = String; };
             Value(ValueType vt) {
-                if (vt == List || vt == Pyob) 
+                if (vt == List or vt == Pyob) 
                     v_.reset( new vector<Value> );
-                if (vt == Mapping || vt == Pyob) 
+                if (vt == Mapping or vt == Pyob) 
                     m_.reset( new map<Value,Value> );
                 t_ = vt; };
             Value(pair<Value,Value> p) {
                 m_.reset( new map<Value,Value> );
                 (*m_)[p.first] = p.second;
             }
+
 
             //////////////
             // mutators //
@@ -138,6 +139,13 @@ namespace cppPyon {
                 throw new runtime_error("can't putName");
             };
             void push_back(Value value) { v_->push_back(value); };
+
+            template<typename... Args>
+            void push_back(Value value,Args... args) {
+                v_->push_back(value);
+                this->push_back(args...);
+            }
+
             void promote() {
                 if (t_ != String) 
                     throw runtime_error("can only promote strings");
@@ -209,13 +217,16 @@ namespace cppPyon {
             };
             
             ////////////////////////
-            // == and < operators //
+            // comparison operators
             ////////////////////////
             bool operator==(const char * c) const {
                 if (t_ == String) return (*s_) == c;
                 return false;
             }
-            bool operator==(const Value & other) const {
+            bool operator!=(const Value& other) const {
+                return not (*this == other);
+            }
+            bool operator==(const Value& other) const {
                 if (t_ != other.t_) return false;
                 if (t_ == String) 
                     return *s_ == *other.s_;
@@ -224,7 +235,20 @@ namespace cppPyon {
                     return i_ == other.i_;
                 if ( t_ == Double)
                     return d_ == other.d_;
-                throw runtime_error("eq test on compound types");
+                if ( t_ == Pyob and *s_ != *other.s_) return false;
+                if ( t_ == List or t_ == Pyob ) {
+                    int n = v_->size();
+                    if (n != other.v_->size()) return false;
+                    for (int i=0;i<n;i++) 
+                        if ((*this)[i] != other[i]) return false;
+                } 
+                if ( t_ == Mapping or t_ == Pyob ) {
+                    int n = m_->size();
+                    if (n != (other.m_)->size()) return false;
+                    for (auto it = m_->begin(); it != m_->end(); ++it)
+                        if (it->second != other[it->first]) return false;
+                } 
+                return true;
             };
             bool operator==(bool other) const {
                 if (t_ != Bool) return false;
@@ -242,32 +266,53 @@ namespace cppPyon {
                     return i_ == (int) other;
                 return false;
             };
-            bool operator<(const Value & other) const {
+            bool operator<=(const Value& other) const {
+                return not (other < *this);
+            }
+            bool operator>(const Value& other) const {
+                return other < *this;
+            }
+            bool operator<(const Value& other) const {
                 if (t_ != other.t_) return t_ < other.t_;
                 if (t_ == String) return *s_ < *other.s_;
                 if (t_ == Int || t_ == Bool) return i_ < other.i_;
                 if (t_ == Null) return false;
                 if (t_ == Double) return d_ < other.d_;
-                throw runtime_error("comparison on compound types!");
+                if ( t_ == Pyob and *s_ != *other.s_) return *s_ < *other.s_;
+                if ( t_ == List or t_ == Pyob ) {
+                    int n = v_->size();
+                    if (n != other.v_->size()) return n < other.v_->size();
+                    for (int i=0;i<n;i++) 
+                        if ((*v_)[i] != (*other.v_)[i]) 
+                            return (*v_)[i] < (*other.v_)[i];
+                } 
+                if ( t_ == Mapping or t_ == Pyob ) {
+                    int n = m_->size();
+                    if (n != (other.m_)->size()) return n < (other.m_)->size();
+                    for (auto it = m_->begin(); it != m_->end(); ++it)
+                        if (it->second != (*other.m_)[it->first]) 
+                            return (it->second < (*other.m_)[it->first]);
+                } 
+                return false;
             };
 
             ////////////////////
             // element access //
             ////////////////////
-            Value& operator[](const string s) {
+            Value& operator[](const string s) const {
                 if (t_ == Mapping || t_ == Pyob) return (*m_)[s];
                 throw runtime_error("type not compatiable");
             };
-            Value& operator[](const char * c) {
+            Value& operator[](const char * c) const {
                 if (t_ == Mapping || t_ == Pyob) 
                     return (*m_)[Value(c)];
                 throw runtime_error("type not compatiable");
             };
-            Value& operator[](int n) {
+            Value& operator[](int n) const {
                 if (t_ == List || t_ == Pyob) return (*v_)[n];
                 throw runtime_error("type not compatiable");
             };
-            Value& operator[](Value v) {
+            Value& operator[](Value v) const {
                 if (v.t_ == Int && (t_ == List || t_ == Pyob))
                         return (*v_)[v.i_];
                 if (t_ == Mapping || t_ == Pyob) return (*m_)[v];
@@ -317,5 +362,21 @@ namespace cppPyon {
         Value value = Pyob;
         value.putName(right);
         return value;
+    }
+
+    template<typename... Args>
+    Value listOf(Args... args) // recursive variadic function
+    {
+        Value out = List;
+        out.push_back(args...);
+        return out;
+    }
+    template<typename... Args>
+    Value makePyob(const char* kind, Args... args) 
+    {
+        Value out = kind;
+        out.promote();
+        out.push_back(args...);
+        return out;
     }
 }

@@ -30,6 +30,16 @@ int main(int argc,char* argv[]) {
     cout << Parser().parse("{'red':13,'blue':'foo'}") << endl;
     cout << Parser().parse("{13:'red','blue':[true,None]}") << endl;
 
+    Value val =  Parser().parse("red(5,7,y=13)");
+    Value expected = "red";
+    expected.promote();
+    expected.push_back(5);
+    expected.push_back(7);
+    expected["y"] = 13;
+    if (val != expected) throw runtime_error("missmatch");
+    val.push_back(19);
+    if (val <= expected) throw runtime_error("issue");
+
     Parser *p = new Parser();
     double start = getCurrentTime();
     Value v = p->parse("Ab([92],foo={3:12},bar=None)");

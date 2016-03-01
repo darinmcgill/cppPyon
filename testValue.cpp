@@ -73,4 +73,31 @@ int main(int argc,char* argv[]) {
 
     Value p8 = Mapping;
     cout << p8 << endl;
+
+    Value p90 = List;
+    Value p91 = List;
+    p90.push_back(5);
+    p90.push_back(7);
+    p91.push_back(5);
+    p91.push_back(7);
+    cout << "comps:" << endl;
+    cout << (p91 == p90) << endl;
+    cout << (p90 < p91) << endl;
+    cout << (p90 > p91) << endl;
+    cout << "---" << endl;
+    p91[1] = 9;
+    cout << (p90 == p91) << endl;
+    cout << (p90 < p91) << endl;
+    cout << (p90 > p91) << endl;
+    cout << p91 << endl;
+
+    Value q0 = List;
+    q0.push_back(3,"hello",Null);
+    cout << q0 << endl;
+
+    Value q1 = listOf(7.5,Null,true,"tacos",List);
+    cout << q1 << endl;
+
+    Value q2 = makePyob("cheese",23,true,"fries");
+    cout << q2 << endl;
 }
