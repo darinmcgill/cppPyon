@@ -100,4 +100,7 @@ int main(int argc,char* argv[]) {
 
     Value q2 = makePyob("cheese",23,true,"fries");
     cout << q2 << endl;
+
+    Value q3 = mapOf("cheese",23,"fries",73);
+    cout << q3 << endl;
 }

@@ -138,13 +138,30 @@ namespace cppPyon {
                 }
                 throw new runtime_error("can't putName");
             };
-            void push_back(Value value) { v_->push_back(value); };
+            void push_back(Value value) { 
+                if (not (t_ == Pyob or t_ == List)) 
+                    throw runtime_error("can't push_back on this type");
+                v_->push_back(value); 
+            };
 
             template<typename... Args>
             void push_back(Value value,Args... args) {
                 v_->push_back(value);
                 this->push_back(args...);
             }
+
+            void put(Value key, Value value) {
+                if (not (t_ == Pyob or t_ == Mapping)) 
+                    throw runtime_error("can't put on this type");
+                (*m_)[key] = value;
+            }
+
+            template<typename... Args>
+            void put(Value key, Value value, Args... args) {
+                this->put(key,value);
+                this->put(args...);
+            }
+            
 
             void promote() {
                 if (t_ != String) 
@@ -377,6 +394,14 @@ namespace cppPyon {
         Value out = kind;
         out.promote();
         out.push_back(args...);
+        return out;
+    }
+
+    template<typename... Args>
+    Value mapOf(Args... args) 
+    {
+        Value out = Mapping;
+        out.put(args...);
         return out;
     }
 }
