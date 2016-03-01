@@ -10,6 +10,7 @@
 #include <memory>
 #include <utility>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 namespace cppPyon {
@@ -413,12 +414,24 @@ namespace cppPyon {
         return out;
     }
 
+    Value unique(Value aList) {
+        if (aList.getType() != List) throw runtime_error("not a list");
+        if (aList.getSize() < 2) return aList;
+        set<Value> out;
+        for (int i=0;i<aList.getSize();i++)
+            out.insert(aList[i]);
+        Value out2 = List;
+        for (auto it = out.begin(); it != out.end(); it++)
+            out2.push_back(*it);
+        return out2;
+    }
+
     Value unionOf(Value left, Value rite) {
         if (left.t_ != List) return unionOf(listOf(left),rite);
         if (rite.t_ != List) return unionOf(left,listOf(rite));
-        left.sort();
-        rite.sort();
         Value out = List;
+        left = unique(left);
+        rite = unique(rite);
         auto leftIt = left.v_->begin();
         auto riteIt = rite.v_->begin();
         while (not (leftIt == left.v_->end() or riteIt == rite.v_->end())) {

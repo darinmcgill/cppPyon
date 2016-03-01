@@ -108,10 +108,15 @@ int main(int argc,char* argv[]) {
     q4.sort();
     cout << q4 << endl;
 
+    Value j1 = listOf(2,3,5,3,7,"foo",true,Null,5,Null);
+    Value j2 = unique(j1);
+    cout << "unique: " << j2 << endl;
+
     Value q51 = listOf(7,1,4,9);
-    Value q52 = listOf(7,13,1);
+    Value q52 = listOf(7,13,7,1);
     Value q53 = unionOf(q51,q52);
     cout << q53 << endl;
     Value q54 = unionOf(q53,8);
     cout << q54 << endl;
+
 }
