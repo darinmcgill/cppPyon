@@ -98,9 +98,6 @@ int main(int argc,char* argv[]) {
     Value q1 = listOf(7.5,Null,true,"tacos",List);
     cout << q1 << endl;
 
-    Value q2 = makePyob("cheese",23,true,"fries");
-    cout << q2 << endl;
-
     Value q3 = mapOf("cheese",23,"fries",73);
     cout << q3 << endl;
 
@@ -118,5 +115,9 @@ int main(int argc,char* argv[]) {
     cout << q53 << endl;
     Value q54 = unionOf(q53,8);
     cout << q54 << endl;
+
+
+    Value v1 = makePyob("cheese",{23,true,"fries"});
+    cout << v1 << endl;
 
 }

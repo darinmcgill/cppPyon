@@ -402,12 +402,15 @@ namespace cppPyon {
         out.push_back(args...);
         return out;
     }
-    template<typename... Args>
-    Value makePyob(const char* kind, Args... args) 
+
+    using Values = initializer_list<Value>;
+    Value makePyob(const char* kind, Values a, Values b=Values()) 
     {
         Value out = kind;
         out.promote();
-        out.push_back(args...);
+        for (auto el : a) {
+            out.push_back(el);
+        }
         return out;
     }
 
