@@ -47,8 +47,13 @@ namespace cppPyon {
                 if (t_ == List or t_ == Pyob) return v_;
                 throw runtime_error("type not compatible");};
 
-            StrPtr getStr() {
-                if (t_ == String or t_ == Pyob) return s_;
+            string getStr() {
+                if (t_ == String or t_ == Pyob) return *s_;
+                throw runtime_error("type not compatible");
+            }
+
+            operator string() {
+                if (t_ == String or t_ == Pyob) return *s_;
                 throw runtime_error("type not compatible");
             }
 
@@ -452,5 +457,13 @@ namespace cppPyon {
         while (leftIt != left.v_->end()) out.push_back(*(leftIt++));
         while (riteIt != rite.v_->end()) out.push_back(*(riteIt++));
         return out;
+    }
+
+    inline Value operator+(Value left, Value rite) {
+        if (left.getType() == String && rite.getType() == String) {
+            string con = left.getStr() + rite.getStr();
+            return Value(con);
+        }
+        throw runtime_error("not implemented");
     }
 }
