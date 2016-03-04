@@ -57,9 +57,11 @@ int main(int argc,char* argv[]) {
     Value p5 = "foo";
     cout << p5.getType() << endl;
 
+    /*
     Value p6 = List << "hello" << "world" << 32;
     p6 << Null << false;
     cout << p6 << endl;
+    */
     //p6.putName("bar");
     //cout << p6 << endl;
 

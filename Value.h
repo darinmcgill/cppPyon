@@ -41,32 +41,38 @@ namespace cppPyon {
 
             MapPtr getMap() { 
                 if (t_ == Mapping or t_ == Pyob) return m_;
-                throw runtime_error("type not compatible");};
+                throw runtime_error("getMap(): bad type:" + getRepr());};
 
             VecPtr getVec() { 
                 if (t_ == List or t_ == Pyob) return v_;
-                throw runtime_error("type not compatible");};
+                throw runtime_error("getVec(): bad type" + getRepr());};
 
             string getStr() {
                 if (t_ == String or t_ == Pyob) return *s_;
-                throw runtime_error("type not compatible");
+                throw runtime_error("getStr(): bad type " + getRepr());
+            }
+
+            string getKind() {
+                if (t_ != Pyob) throw runtime_error("not a pyob");
+                return *s_;
             }
 
             operator string() {
                 if (t_ == String or t_ == Pyob) return *s_;
-                throw runtime_error("type not compatible");
+                throw runtime_error("string(): bad type " + getRepr());
             }
 
-            double getDouble() {
+            operator double() {
                 if (t_ == Double) return d_;
                 if (t_ == Int) return (double) i_;
                 if (t_ == Null) return 0.0/0.0;
                 if (t_ == Bool && i_) return 1.0;
                 if (t_ == Bool && ! i_) return 0.0;
                 if (t_ == String) return atof(s_->c_str());
-                throw runtime_error("type not compatible"); 
+                throw runtime_error("double(): bad type" + getRepr()); 
             };
 
+            /*
             int getInt() {
                 if (t_ == Int) return i_;
                 if (t_ == Bool &&   i_) return 1;
@@ -85,17 +91,19 @@ namespace cppPyon {
                 if (t_ == String) return getSize() > 0; 
                 throw runtime_error("bad type?");
             };
+            */
 
             int getSize() {
                 if (t_ == List) return v_->size();
                 if (t_ == Mapping) return m_->size();
                 if (t_ == Pyob) return v_->size();
                 if (t_ == String) return s_->size();
-                throw runtime_error("type not compatible"); };
+                throw runtime_error("getSize(): bad type" + getRepr());
+            };
 
             const char* c_str() {
                 if (t_ == String) return s_->c_str();
-                throw runtime_error("type not compatible");
+                throw runtime_error("c_str(): bad type: " + getRepr());
             };
             
                 
@@ -404,7 +412,7 @@ namespace cppPyon {
     }
 
     using Values = initializer_list<Value>;
-    Value makePyob(const char* kind, Values a, Values b=Values()) 
+    Value makePyob(const char* kind, Values a=Values(), Values b=Values()) 
     {
         Value out = kind;
         out.promote();
@@ -459,6 +467,12 @@ namespace cppPyon {
         }
         while (leftIt != left.v_->end()) out.push_back(*(leftIt++));
         while (riteIt != rite.v_->end()) out.push_back(*(riteIt++));
+        return out;
+    }
+
+    inline string operator+(const char* left, Value& rite) {
+        string out = left;
+        out += rite.getRepr();
         return out;
     }
 
