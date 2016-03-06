@@ -122,4 +122,7 @@ int main(int argc,char* argv[]) {
     Value v1 = makePyob("cheese",{23,true,"fries"});
     cout << v1 << endl;
 
+    Value v2 = makePyob("Thumps",{10});
+    cout << (double) v2[0] << endl;
+
 }

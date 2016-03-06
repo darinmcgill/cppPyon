@@ -205,9 +205,9 @@ namespace cppPyon {
             string getRepr() const {
                 bool first = true;
                 if (t_ == String) {
-                    string out("\"");
+                    string out("'");
                     out += *s_;
-                    out += "\"";
+                    out += "'";
                     return out;
                 }
                 if (t_ == Null) return string("null");
