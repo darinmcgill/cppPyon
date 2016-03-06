@@ -53,7 +53,8 @@ namespace cppPyon {
             }
 
             string getKind() {
-                if (t_ != Pyob) throw runtime_error("not a pyob");
+                if (t_ != Pyob) 
+                    throw runtime_error("not a pyob: " + getRepr());
                 return *s_;
             }
 
