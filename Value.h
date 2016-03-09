@@ -73,6 +73,8 @@ namespace cppPyon {
                 throw runtime_error("double(): bad type" + getRepr()); 
             };
 
+            bool isNumber() { return (t_ == Double or t_ == Int); }
+
             /*
             int getInt() {
                 if (t_ == Int) return i_;
