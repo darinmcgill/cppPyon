@@ -104,4 +104,5 @@ namespace cppPyon {
             };
     };
     inline Value parse(const char* input) {return Parser().parse(input);}
+    inline Value parse(const string s) {return Parser().parse(s.c_str());}
 }
