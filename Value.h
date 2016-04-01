@@ -427,6 +427,7 @@ namespace cppPyon {
     }
 
     using Values = initializer_list<Value>;
+    inline
     Value makePyob(const char* kind, Values a=Values(), Values b=Values()) 
     {
         Value out = kind;
@@ -445,6 +446,7 @@ namespace cppPyon {
         return out;
     }
 
+    inline
     Value unique(Value aList) {
         if (aList.getType() != List) throw runtime_error("not a list");
         if (aList.getSize() < 2) return aList;
@@ -457,6 +459,7 @@ namespace cppPyon {
         return out2;
     }
 
+    inline
     Value unionOf(Value left, Value rite) {
         if (left.t_ != List) return unionOf(listOf(left),rite);
         if (rite.t_ != List) return unionOf(left,listOf(rite));
