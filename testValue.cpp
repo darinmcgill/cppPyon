@@ -5,6 +5,22 @@ using namespace cppPyon;
 using namespace std;
 
 int main(int argc,char* argv[]) {
+
+    Value v = "abc";
+    cout << v.hash() << endl;
+    cout << Value(Null).hash() << endl;
+    cout << Value(true).hash() << endl;
+    cout << Value(false).hash() << endl;
+    cout << Value(List).hash() << endl;
+    cout << listOf(1).hash() << endl;
+    Value mm = Mapping;
+    mm["foo"] = "bar";
+    cout << mm.hash() << endl;
+    Value abcd = makePyob("foo",{"bar",3});
+    cout << abcd.hash() << endl;
+    return 0;
+
+
     cout << "sizeof ValueType:" << sizeof(ValueType) << endl;
     cout << "sizeof Value:" << sizeof(Value) << endl;
     cout << "sizeof string:" << sizeof(string) << endl;
@@ -124,5 +140,6 @@ int main(int argc,char* argv[]) {
 
     Value v2 = makePyob("Thumps",{10});
     cout << (double) v2[0] << endl;
+
 
 }

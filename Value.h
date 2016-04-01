@@ -13,6 +13,27 @@
 #include <set>
 using namespace std;
 
+extern "C" {
+int siphash(uint8_t *out, const uint8_t *in, uint64_t inlen, const uint8_t *k);
+}
+
+inline uint64_t myHash(const char* in, int inlen=-1) {
+    uint64_t keys[2];
+    keys[0] = 506097522914230528ULL;
+    keys[1] = 1084818905618843912ULL;
+    if (inlen == -1) inlen = strlen(in);
+    uint64_t target;
+    siphash((uint8_t* )&target,(uint8_t*) in, inlen, (uint8_t*) &(keys[0]));
+    return target;
+}
+
+inline uint64_t myHash(uint64_t a, uint64_t b) {
+    uint64_t ab[2];
+    ab[0] = a;
+    ab[1] = b;
+    return myHash((const char*) &(ab[0]),16);
+}
+
 namespace cppPyon {
     class Value;
     typedef shared_ptr< map<Value,Value> > MapPtr;
@@ -52,7 +73,7 @@ namespace cppPyon {
                 throw runtime_error("getStr(): bad type " + getRepr());
             }
 
-            string getKind() {
+            string kind() const {
                 if (t_ != Pyob) 
                     throw runtime_error("not a pyob: " + getRepr());
                 return *s_;
@@ -85,7 +106,7 @@ namespace cppPyon {
                 throw runtime_error("int(): bad type" + getRepr()); 
             }
 
-            bool isNumber() { return (t_ == Double or t_ == Int); }
+            bool isNumber() const { return (t_ == Double or t_ == Int); }
 
             /*
             int getInt() {
@@ -101,19 +122,19 @@ namespace cppPyon {
                 if (t_ == Double) return d_ != 0;
                 if (t_ == Null) return false;
                 if (t_ == Pyob) return true;
-                if (t_ == Mapping) return getSize() > 0;
-                if (t_ == List) return getSize() > 0;
-                if (t_ == String) return getSize() > 0; 
+                if (t_ == Mapping) return size() > 0;
+                if (t_ == List) return size() > 0;
+                if (t_ == String) return size() > 0; 
                 throw runtime_error("bad type?");
             };
             */
 
-            int getSize() {
+            size_t size() const {
                 if (t_ == List) return v_->size();
                 if (t_ == Mapping) return m_->size();
                 if (t_ == Pyob) return v_->size();
                 if (t_ == String) return s_->size();
-                throw runtime_error("getSize(): bad type" + getRepr());
+                throw runtime_error("size(): bad type" + getRepr());
             };
 
             const char* c_str() {
@@ -387,6 +408,45 @@ namespace cppPyon {
                     return m_->count(v) > 0;
                 return false;
             };
+
+            uint64_t hash() const {
+                if (t_ == Null)
+                    return 11924423634372684106ULL;
+                if (t_ == Bool) {
+                    if (i_) return 15048741373040539721ULL;
+                    return 3842791678396607141ULL;
+                }
+                if (t_ == String)
+                    return myHash(s_->c_str(),s_->size());
+                if (t_ == Double) 
+                    return myHash((const char*)&d_, 8);
+                if (t_ == Int) 
+                    return myHash((const char*)&i_, 4);
+                if (t_ == List) {
+                    uint64_t current = 17003034975299842994ULL;
+                    for (Value& v : *v_) 
+                        current = myHash(current,v.hash());
+                    return current;
+                }
+                if (t_ == Mapping) {
+                    uint64_t current = 1551069553966629517ULL;
+                    for (auto& x : *m_) 
+                        current = myHash(current,
+                            myHash(x.first.hash(),x.second.hash()));
+                    return current;
+                }
+                if (t_ == Pyob) {
+                    uint64_t current = 3030619542563045960ULL;
+                    current = myHash(current,myHash(s_->c_str(),s_->size()));
+                    for (Value& v : *v_) 
+                        current = myHash(current,v.hash());
+                    for (auto& x : *m_) 
+                        current = myHash(current,
+                            myHash(x.first.hash(),x.second.hash()));
+                    return current;
+                }
+                throw runtime_error("not implemented");
+            }
     };
     inline 
     ostream& operator<<(ostream& output,const Value& value) {
@@ -449,9 +509,9 @@ namespace cppPyon {
     inline
     Value unique(Value aList) {
         if (aList.getType() != List) throw runtime_error("not a list");
-        if (aList.getSize() < 2) return aList;
+        if (aList.size() < 2) return aList;
         set<Value> out;
-        for (int i=0;i<aList.getSize();i++)
+        for (int i=0;i<aList.size();i++)
             out.insert(aList[i]);
         Value out2 = List;
         for (auto it = out.begin(); it != out.end(); it++)
