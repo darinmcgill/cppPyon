@@ -103,4 +103,5 @@ namespace cppPyon {
                 return readValue();
             };
     };
+    inline Value parse(const char* input) {return Parser().parse(input);}
 }
