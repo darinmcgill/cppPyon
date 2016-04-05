@@ -94,6 +94,21 @@ namespace cppPyon {
                 throw runtime_error("double(): bad type" + getRepr()); 
             };
 
+            operator size_t() {
+                if (t_ == Bool && i_) return 1;
+                if (t_ == Bool && ! i_) return 0;
+                if (t_ == Int) {
+                    if (i_ < 0) throw runtime_error("value is negative");
+                    return static_cast<size_t>(i_);
+                }
+                if (t_ == Double) {
+                    if (d_ < 0 or d_ != d_) 
+                        throw runtime_error("value is invalid");
+                    return static_cast<size_t>(d_);
+                }
+                throw runtime_error("can't be changed into a size_t");
+            };
+
             operator bool() {
                 if (t_ == Int or t_ == Bool) return (bool) i_;
                 if (t_ == Double) return not (d_ == 0);
