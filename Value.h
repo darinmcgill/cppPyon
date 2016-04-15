@@ -460,7 +460,7 @@ namespace cppPyon {
                             myHash(x.first.hash(),x.second.hash()));
                     return current;
                 }
-                throw runtime_error("not implemented");
+                throw runtime_error("Value.hash: not implemented");
             }
     };
     inline 
@@ -574,6 +574,7 @@ namespace cppPyon {
             string con = left.getStr() + rite.getStr();
             return Value(con);
         }
-        throw runtime_error("not implemented");
+        throw runtime_error("Value operator+ not implemented: " + 
+            left.getRepr() + " " + rite.getRepr());
     }
 }
