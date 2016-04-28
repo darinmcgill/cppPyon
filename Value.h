@@ -164,6 +164,7 @@ namespace cppPyon {
             Value() { t_ = Null; };
             Value(bool b) { i_ = b; t_ = Bool; };
             Value(int i) {i_ = i; t_ = Int;};
+            Value(size_t s) {i_ = static_cast<int>(s); t_ = Int;};
             Value(double d){d_ = d; t_ = Double;};
             Value(const string& s){ 
                 s_.reset( new string(s) );
