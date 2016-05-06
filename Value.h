@@ -409,6 +409,10 @@ namespace cppPyon {
                 if (t_ == Mapping || t_ == Pyob) return (*m_)[v];
                 throw runtime_error("type not compatiable");
             };
+            Value get(Value key,Value ifMissing=Null) const {
+                if (has_key(key)) return (*this)[key];
+                return ifMissing;
+            }
             bool has_key(const char * c) const {
                 if (! (t_ == Mapping || t_ == Pyob)) return false;
                 return m_->count(string(c)) > 0; };
