@@ -515,6 +515,17 @@ namespace cppPyon {
         for (auto el : a) {
             out.push_back(el);
         }
+        bool tick = true;
+        Value key;
+        for (auto el : b) {
+            if (tick) {
+                key = el;
+                tick = false;
+            } else {
+                out[key] = el;
+                tick = true;
+            }
+        }
         return out;
     }
 
