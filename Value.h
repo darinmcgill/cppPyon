@@ -272,7 +272,10 @@ namespace cppPyon {
                 stringstream oss;
                 if (t_ == Int) oss << i_;
                 if (t_ == Double) {
-                    oss << to_string(d_);
+                    if (round(d_) == d_)
+                        oss << static_cast<int64_t>(d_);
+                    else 
+                        oss << to_string(d_);
                 }
                 if (t_ == List) {
                     oss << "[";

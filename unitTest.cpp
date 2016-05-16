@@ -54,6 +54,16 @@ int main(int argc, char** argv) {
         ASSERT(static_cast<double>(v) < 1439856000049.);
     };
 
+    tests["display"] = [](bool verbose) {
+        string s = "1439856000048.691162";
+        Value v = parse(s);
+        ASSERT(s == v.getRepr());
+
+        s = "3.0";
+        v = parse(s);
+        ASSERT(v.getRepr() == "3");
+    };
+
 
     runTests(argc,argv,tests);
 
