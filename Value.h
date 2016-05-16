@@ -11,6 +11,7 @@
 #include <utility>
 #include <algorithm>
 #include <set>
+#include <limits>
 using namespace std;
 
 extern "C" {
@@ -49,8 +50,8 @@ namespace cppPyon {
             MapPtr m_;
             StrPtr s_;
             VecPtr v_;
-            double d_;
-            int i_;
+            double d_ = std::numeric_limits<double>::quiet_NaN();
+            int64_t i_;
             ValueType t_;
         public:
 
@@ -164,7 +165,8 @@ namespace cppPyon {
             Value() { t_ = Null; };
             Value(bool b) { i_ = b; t_ = Bool; };
             Value(int i) {i_ = i; t_ = Int;};
-            Value(size_t s) {i_ = static_cast<int>(s); t_ = Int;};
+            Value(int64_t i) {i_ = i; t_ = Int;};
+            Value(size_t s) {i_ = static_cast<int64_t>(s); t_ = Int;};
             Value(double d){d_ = d; t_ = Double;};
             Value(const string& s){ 
                 s_.reset( new string(s) );
@@ -180,7 +182,8 @@ namespace cppPyon {
                     v_.reset( new vector<Value> );
                 if (vt == Mapping or vt == Pyob) 
                     m_.reset( new map<Value,Value> );
-                t_ = vt; };
+                t_ = vt; 
+            };
             Value(pair<Value,Value> p) {
                 m_.reset( new map<Value,Value> );
                 (*m_)[p.first] = p.second;
@@ -268,7 +271,9 @@ namespace cppPyon {
                     else return string("false"); }
                 stringstream oss;
                 if (t_ == Int) oss << i_;
-                if (t_ == Double) oss << d_;
+                if (t_ == Double) {
+                    oss << to_string(d_);
+                }
                 if (t_ == List) {
                     oss << "[";
                     for (auto it=v_->begin();it !=v_->end();it++) {

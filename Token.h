@@ -48,7 +48,7 @@ namespace cppPyon {
                     (*readFrom)++; }
                 if ((**readFrom) == '+') (*readFrom)++;
                 bool floating = false;
-                int beforeDecimal = 0;
+                int64_t beforeDecimal = 0;
                 double afterDecimal = 0.0;
                 int e = 0;
                 bool eneg = false;

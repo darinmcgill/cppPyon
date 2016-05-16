@@ -90,7 +90,9 @@ namespace cppPyon {
                     if (v == "true" || v == "True") return Value(true);
                     if (v == "false" || v == "False") return Value(false);
                     if (v == "null" || v == "None") return Value();
-                    throw string("parse error at:") + v.c_str();
+                    if (v == "nan" || v == "NAN" || v== "NaN") 
+                        return Value(Double);
+                    throw runtime_error(string("parse error at:") + v.c_str());
                 }
                 if (t == '[') return readList();
                 if (t == '{') return readMapping();
