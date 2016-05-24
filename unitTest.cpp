@@ -64,6 +64,26 @@ int main(int argc, char** argv) {
         ASSERT(v.getRepr() == "3");
     };
 
+    tests["commentLine"] = [] (bool verbose) {
+        string foo = "[3,2,# hello world 5\n7, // nevermore 8\n 13]";
+        Value v = parse(foo);
+        ASSERT(v.size() == 4);
+        ASSERT(v[0] == 3);
+        ASSERT(v[1] == 2);
+        ASSERT(v[2] == 7);
+        ASSERT(v[3] == 13);
+    };
+
+    tests["commentBlock"] = [] (bool verbose) {
+        string foo = "[3,2,/* hello world 5\n7, // nevermore 8 */\n 13]";
+        Value v = parse(foo);
+        if (verbose) cerr << v << endl;
+        ASSERT(v.size() == 3);
+        ASSERT(v[0] == 3);
+        ASSERT(v[1] == 2);
+        ASSERT(v[2] == 13);
+    };
+
 
     runTests(argc,argv,tests);
 

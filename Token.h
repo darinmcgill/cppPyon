@@ -35,7 +35,7 @@ namespace cppPyon {
                 type_ = Quoted;
             };
             bool isWhiteSpace(char w) {
-                return w == ' ' || w == '\t' || w == '\n';
+                return w == ' ' || w == '\t' || w == '\n' || w == '\r';
             };
             bool isDigit(char d) {
                 return (d >= '0' && d <= '9');
@@ -100,6 +100,33 @@ namespace cppPyon {
                 value_ = Value(start,(*readFrom) - start);
                 type_ = Bareword;
             };
+            void removeCommentsAndWhiteSpace(char **readFrom) {
+                while (**readFrom != 0) {
+                    if (isWhiteSpace(**readFrom)) { 
+                        (*readFrom)++;
+                        continue; 
+                    }
+                    if (**readFrom == '#' or 
+                       (**readFrom == '/' and *(*readFrom+1) == '/')) {
+                        while (**readFrom != '\n' and **readFrom != 0) {
+                            (*readFrom)++;
+                        } 
+                        continue;
+                    }
+                    if (**readFrom == '/' and *(*readFrom+1) == '*') {
+                        (*readFrom)++;
+                        (*readFrom)++;
+                        while (!(**readFrom == '*' and *(*readFrom+1) == '/')){
+                            if (**readFrom == 0) return;
+                            (*readFrom)++;
+                        }
+                        (*readFrom)++;
+                        (*readFrom)++;
+                        continue;
+                    }
+                    return;
+                }
+            }
         public:
             Token(TokenType t) { type_ = t; };
             Token(TokenType t,Value v) {
@@ -107,7 +134,8 @@ namespace cppPyon {
                 value_ = v;
             };
             Token(char **readFrom) {
-                while (isWhiteSpace(**readFrom)) (*readFrom)++;
+                //while (isWhiteSpace(**readFrom)) (*readFrom)++;
+                removeCommentsAndWhiteSpace(readFrom);
                 char first = **readFrom;
                 switch (first) {
                     case 0: type_ = End; return;
@@ -139,7 +167,9 @@ namespace cppPyon {
                 if (first >= '0' && first <= '9') readNumber(readFrom);
                 else if (first >= 'a' && first <= 'z') readBareword(readFrom);
                 else if (first >= 'A' && first <= 'Z') readBareword(readFrom);
-                else throw runtime_error("don't know how to read");
+                else throw runtime_error(
+                    "don't know how to read:" + 
+                        to_string(static_cast<int>(**readFrom)));
             };
             string getRepr() const {
                 if (type_ > 10) 
