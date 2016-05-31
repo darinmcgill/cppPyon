@@ -411,6 +411,10 @@ namespace cppPyon {
                 if (t_ == List || t_ == Pyob) return (*v_)[n];
                 throw runtime_error("type not compatiable");
             };
+            Value& operator[](size_t n) const {
+                if (t_ == List || t_ == Pyob) return (*v_)[n];
+                throw runtime_error("type not compatiable");
+            };
             Value& operator[](Value v) const {
                 if (v.t_ == Int && (t_ == List || t_ == Pyob))
                         return (*v_)[v.i_];
