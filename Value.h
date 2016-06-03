@@ -330,7 +330,7 @@ namespace cppPyon {
                 if (t_ == String) 
                     return *s_ == *other.s_;
                 if (t_ == Null) return true;
-                if (t_ == Bool | t_ == Int)
+                if ((t_ == Bool) or (t_ == Int))
                     return i_ == other.i_;
                 if ( t_ == Double)
                     return d_ == other.d_;
