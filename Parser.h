@@ -89,7 +89,7 @@ namespace cppPyon {
                     Value v = t.getValue();
                     if (v == "true" || v == "True") return Value(true);
                     if (v == "false" || v == "False") return Value(false);
-                    if (v == "null" || v == "None") return Value();
+                    if (v == "null" || v == "None" || v == "Null") return Value();
                     if (v == "nan" || v == "NAN" || v== "NaN") 
                         return Value(Double);
                     throw runtime_error(string("parse error at:") + v.c_str());
